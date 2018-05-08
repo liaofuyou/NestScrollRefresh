@@ -2,18 +2,15 @@ package me.ajax.nestscrollrefresh;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.NestedScrollingParent2;
 import android.support.v4.view.NestedScrollingParentHelper;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
-import android.widget.TextView;
 
 /**
  * Created by AJ on 2018/5/3
@@ -21,7 +18,7 @@ import android.widget.TextView;
 public class RefreshLayout extends LinearLayout implements NestedScrollingParent2 {
 
     private HeadView headView;
-    private TextView footView;
+    private FootView footView;
     private RecyclerView recyclerView;
     private NestedScrollingParentHelper mNestedScrollingParentHelper;
     private Scroller mScroller;
@@ -42,17 +39,11 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
         mScroller = new Scroller(getContext());
         mNestedScrollingParentHelper = new NestedScrollingParentHelper(this);
 
-        int p = dp(8);
-
         headView = new HeadView(getContext());
         addView(headView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        footView = new TextView(getContext());
-        footView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        footView.setGravity(Gravity.CENTER);
-        footView.setPadding(p, p, p, p);
-        footView.setText("上拉加载更多");
-        addView(footView);
+        footView = new FootView(getContext());
+        addView(footView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
     }
 
 
@@ -91,6 +82,12 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
     }
 
     @Override
+    public void scrollTo(int x, int y) {
+        if (y > footView.getMeasuredHeight()) y = footView.getMeasuredHeight();
+        super.scrollTo(x, y);
+    }
+
+    @Override
     public void computeScroll() {
         super.computeScroll();
         if (mScroller.computeScrollOffset()) {
@@ -102,52 +99,6 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
     @Override
     public int getNestedScrollAxes() {
         return mNestedScrollingParentHelper.getNestedScrollAxes();
-    }
-
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        headView.layout(0, -headView.getMeasuredHeight(), r, 0);
-        recyclerView.layout(l, t, r, b);
-        footView.layout(0, b, r, b + footView.getMeasuredHeight());
-    }
-
-    void refreshFootViewText(int scrollY) {
-        footView.setText("上拉加载更多");
-    }
-
-    public void refreshComplete() {
-        mAllOffsetDy = 0;
-        //footView.setRefreshState(RefreshState.COMPLETE);
-        headView.setRefreshState(RefreshState.COMPLETE);
-        mScroller.startScroll(0, getScrollY(), 0, -getScrollY(), 800);
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                headView.setRefreshState(RefreshState.START);
-            }
-        }, 800);
-        invalidate();
-    }
-
-
-    public void loadMoreComplete() {
-    }
-
-    public void setOnLoadListener(OnLoadListener onLoadListener) {
-        this.onLoadListener = onLoadListener;
-    }
-
-    private int dp(float dp) {
-        return (int) (getResources().getDisplayMetrics().density * dp + 0.5F);
-    }
-
-    static void l(Object... list) {
-        StringBuilder text = new StringBuilder();
-        for (Object o : list) {
-            text.append("   ").append(o.toString());
-        }
-        Log.e("######", text.toString());
     }
 
     @Override
@@ -177,8 +128,10 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
             //在顶部的时候
             if (targetScrollToTop()) {
 
+                if (headView.state != RefreshState.REFRESH
+                        && ViewCompat.TYPE_TOUCH != type) return;
 
-                double dragIndex = Math.exp(-mAllOffsetDy / 200);
+                double dragIndex = Math.exp(-mAllOffsetDy / dp(70));
                 if (dragIndex < 0) dragIndex = 0;
                 dy = (int) (dy * dragIndex);
                 mAllOffsetDy += -dy;
@@ -192,7 +145,6 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
 
                 scrollBy(0, dy);
                 headView.onUIPositionChange(getScrollY());
-                refreshFootViewText(getScrollY());
             }
 
             //在底部部的时候
@@ -200,12 +152,17 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
 
                 dy = Math.max(-getScrollY(), dy);
 
-                //scrollBy(0, dy);
-                //consumed[1] = dy;
+                scrollBy(0, dy);
+                consumed[1] = dy;
 
-                //headView.onUIPositionChange(getScrollY());
-                //refreshFootViewText(getScrollY());
+                mAllOffsetDy += dy;
 
+                if (footView.state != RefreshState.REFRESH
+                        && getScrollY() >= footView.getMeasuredHeight()) {
+                    return;
+                }
+
+                footView.onUIPositionChange(getScrollY());
             }
         }
         //向上滑动
@@ -213,7 +170,6 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
 
             //在顶部的时候
             if (getScrollY() < 0) {
-                l("向上滑动 在顶部的时候 ", dy, -getScrollY());
                 dy = Math.min(-getScrollY(), dy);
 
                 mAllOffsetDy += -dy;
@@ -222,16 +178,25 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
 
                 if (headView.state != RefreshState.REFRESH) {
                     headView.onUIPositionChange(getScrollY());
-                    refreshFootViewText(getScrollY());
                 }
             }
 
             //在底部部的时候
             if (targetScrollToBottom()) {
-                //scrollBy(0, dy);
-                //consumed[1] = dy;
-                //headView.onUIPositionChange(getScrollY());
-                //refreshFootViewText(getScrollY());
+                /* 没必要
+                double dragIndex = Math.exp(-mAllOffsetDy / dp(40));
+                if (dragIndex < 0) dragIndex = 0;
+                dy = (int) (dy * dragIndex);
+                */
+
+                mAllOffsetDy += dy;
+                consumed[1] = dy;
+                scrollBy(0, dy);
+
+                //看看能否开始"加载更多"
+                tryToLoadMore();
+
+                footView.onUIPositionChange(getScrollY());
             }
         }
     }
@@ -243,6 +208,7 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
 
         int scrollY = getScrollY();
 
+        //在头部
         if (scrollY < 0) {
             if (headView.state == RefreshState.REFRESH) {
                 return;
@@ -265,19 +231,79 @@ public class RefreshLayout extends LinearLayout implements NestedScrollingParent
             }
             invalidate();
         }
+
+        //在底部
         if (scrollY > 0) {
-            /*
-            footView.setText("正在刷新");
-            footView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScroller.startScroll(0, getScrollY(), 0, -getScrollY(), 800);
-                    invalidate();
-                }
-            }, 1000);
-            */
+
+            //看看能否开始"加载更多"
+            tryToLoadMore();
+        }
+    }
+
+    /**
+     * 尝试去加载更多
+     */
+    private void tryToLoadMore() {
+
+        if (footView.state == RefreshState.REFRESH) {
+            return;
         }
 
+        if (getScrollY() != footView.getMeasuredHeight()) {
+            return;
+        }
+
+        footView.setRefreshState(RefreshState.REFRESH);
+        if (onLoadListener != null) {
+            onLoadListener.loadMore();
+        }
+    }
+
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        headView.layout(0, -headView.getMeasuredHeight(), r, 0);
+        recyclerView.layout(l, t, r, b);
+        footView.layout(0, b, r, b + footView.getMeasuredHeight());
+    }
+
+
+    public void refreshComplete() {
+        mAllOffsetDy = 0;
+        headView.setRefreshState(RefreshState.COMPLETE);
+        mScroller.startScroll(0, getScrollY(), 0, -getScrollY(), 800);
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                headView.setRefreshState(RefreshState.START);
+            }
+        }, 800);
+        invalidate();
+    }
+
+
+    public void loadMoreComplete() {
+        headView.setRefreshState(RefreshState.START);
+        mAllOffsetDy = 0;
+        footView.setRefreshState(RefreshState.START);
+        recyclerView.scrollBy(0, getScrollY());
+        scrollTo(0, 0);
+    }
+
+    public void setOnLoadListener(OnLoadListener onLoadListener) {
+        this.onLoadListener = onLoadListener;
+    }
+
+    private int dp(float dp) {
+        return (int) (getResources().getDisplayMetrics().density * dp + 0.5F);
+    }
+
+    static void l(Object... list) {
+        StringBuilder text = new StringBuilder();
+        for (Object o : list) {
+            text.append("   ").append(o.toString());
+        }
+        Log.e("######", text.toString());
     }
 
 }

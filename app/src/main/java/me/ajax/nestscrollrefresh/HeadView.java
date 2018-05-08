@@ -18,7 +18,9 @@ public class HeadView extends LinearLayout {
     TextView textView;
     ImageView arrowView;
     ProgressBar progressBar;
-    RefreshState state = RefreshState.START;
+    RefreshState state;
+
+    float density = 1F;
 
     public HeadView(Context context) {
         super(context);
@@ -36,6 +38,7 @@ public class HeadView extends LinearLayout {
     }
 
     void init() {
+        density = getResources().getDisplayMetrics().density;
 
         View.inflate(getContext(), R.layout.header_view, this);
         textView = findViewById(R.id.text_view);
@@ -91,6 +94,6 @@ public class HeadView extends LinearLayout {
     }
 
     private int dp(float dp) {
-        return (int) (getResources().getDisplayMetrics().density * dp + 0.5F);
+        return (int) (density * dp + 0.5F);
     }
 }

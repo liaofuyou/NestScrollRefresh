@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -16,11 +17,11 @@ import java.util.Random;
 //自定义Adapter
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
-    private ArrayList<String> myData;
+    private ArrayList<String> myData = new ArrayList<>();
 
     MyAdapter() {
 
-        int size = 20;
+        int size = 10;
         myData = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             myData.add("TEXT " + (i + 1));
@@ -39,23 +40,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         //holder.setStr(position + "");
     }
 
-    public void add(String str) {
-        myData.add(str);
-        notifyItemInserted(myData.size() - 1);//注意这里
+    public void setDatas(List<String> list) {
+        myData.clear();
+        addDatas(list);
     }
 
-    public void remove(int position) {
-        myData.remove(position);
-        notifyItemRemoved(position);//注意这里
-    }
 
-    public void change(String str, int position) {
-        myData.set(position, str);
-        notifyItemChanged(position);//注意这里
-    }
-
-    public void move(int fromPosition, int toPosition) {
-        notifyItemMoved(fromPosition, toPosition);
+    public void addDatas(List<String> list) {
+        myData.addAll(list);
+        notifyDataSetChanged();
     }
 
     @Override
