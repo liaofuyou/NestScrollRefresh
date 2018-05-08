@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
                         textAdapter.setDatas(getDatas(0));
                         refreshLayout.refreshComplete();
                     }
-                }, 2000);
+                }, 1000);
             }
 
             @Override
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
                         textAdapter.addDatas(getDatas(textAdapter.getItemCount()));
                         refreshLayout.loadMoreComplete();
                     }
-                }, 2000);
+                }, 1000);
             }
         });
 
