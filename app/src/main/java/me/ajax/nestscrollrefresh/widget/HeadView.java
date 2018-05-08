@@ -1,4 +1,4 @@
-package me.ajax.nestscrollrefresh;
+package me.ajax.nestscrollrefresh.widget;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import me.ajax.nestscrollrefresh.R;
 
 /**
  * Created by aj on 2018/5/4

@@ -1,13 +1,8 @@
-package me.ajax.nestscrollrefresh;
+package me.ajax.nestscrollrefresh.widget;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 /**
  * Created by aj on 2018/5/4

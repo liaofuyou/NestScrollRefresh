@@ -1,4 +1,4 @@
-package me.ajax.nestscrollrefresh;
+package me.ajax.nestscrollrefresh.widget;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

@@ -8,16 +8,18 @@ import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.ajax.nestscrollrefresh.widget.OnLoadListener;
+import me.ajax.nestscrollrefresh.widget.RefreshLayout;
+
 public class MainActivity extends AppCompatActivity {
 
     RefreshLayout refreshLayout;
-    MyAdapter myAdapter;
+    TextAdapter textAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         refreshLayout = findViewById(R.id.refresh_layout);
         refreshLayout.setOnLoadListener(new OnLoadListener() {
@@ -26,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        myAdapter.setDatas(getDatas(0));
+                        textAdapter.setDatas(getDatas(0));
                         refreshLayout.refreshComplete();
                     }
                 }, 2000);
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        myAdapter.addDatas(getDatas(myAdapter.getItemCount()));
+                        textAdapter.addDatas(getDatas(textAdapter.getItemCount()));
                         refreshLayout.loadMoreComplete();
                     }
                 }, 2000);
@@ -46,16 +48,16 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(myAdapter = new MyAdapter());
+        recyclerView.setAdapter(textAdapter = new TextAdapter());
 
-        myAdapter.addDatas(getDatas(0));
+        textAdapter.setDatas(getDatas(0));
     }
 
     List<String> getDatas(int baseIndex) {
 
         List<String> list = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            list.add("TEXT " + (baseIndex + i + 1));
+            list.add("" + (baseIndex + i + 1));
         }
         return list;
     }

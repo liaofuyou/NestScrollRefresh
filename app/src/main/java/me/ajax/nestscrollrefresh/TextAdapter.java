@@ -15,18 +15,9 @@ import java.util.Random;
  * Created by aj on 2018/4/23
  */
 //自定义Adapter
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+public class TextAdapter extends RecyclerView.Adapter<TextAdapter.MyViewHolder> {
 
     private ArrayList<String> myData = new ArrayList<>();
-
-    MyAdapter() {
-
-        int size = 10;
-        myData = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            myData.add("TEXT " + (i + 1));
-        }
-    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
