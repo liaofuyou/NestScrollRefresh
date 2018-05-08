@@ -20,7 +20,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     MyAdapter() {
 
-        int size = 10;
+        int size = 20;
         myData = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             myData.add("TEXT " + (i + 1));
