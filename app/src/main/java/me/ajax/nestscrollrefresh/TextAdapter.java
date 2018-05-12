@@ -1,6 +1,5 @@
 package me.ajax.nestscrollrefresh;
 
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by aj on 2018/4/23
@@ -28,7 +26,6 @@ public class TextAdapter extends RecyclerView.Adapter<TextAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         holder.setStr(myData.get(position));
-        //holder.setStr(position + "");
     }
 
     public void setDatas(List<String> list) {
@@ -49,23 +46,12 @@ public class TextAdapter extends RecyclerView.Adapter<TextAdapter.MyViewHolder> 
 
     //自定义Holder
     static class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView strTv;
 
-        Random random = new Random();
+        private TextView strTv;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             strTv = (TextView) itemView.findViewById(R.id.text);
-
-            //itemView.setBackgroundColor(getRandomColor());
-        }
-
-        int getRandomColor() {
-            StringBuilder text = new StringBuilder("#FF");
-            for (int i = 0; i < 6; i++) {
-                text.append(random.nextInt(9));
-            }
-            return Color.parseColor(text.toString());
         }
 
         public void setStr(String str) {
